@@ -578,6 +578,3 @@ class Serial {
     return ports;
   }
 }
-
-/* an object to be used for starting the serial workflow */
-export const serial = new Serial();
