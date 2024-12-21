@@ -515,6 +515,13 @@ export class SerialPort {
 /** implementation of the global navigator.serial object */
 export class Serial {
   /**
+   * @param {USB} usb Instance of navigator.serial object
+   */
+  constructor(
+    private readonly usb: USB
+  ) { }
+
+  /**
    * Requests permission to access a new port.
    *
    * @param {SerialPortRequestOptions} options
@@ -548,7 +555,7 @@ export class Serial {
       });
     }
 
-    const device = await navigator.usb.requestDevice({'filters': usbFilters});
+    const device = await this.usb.requestDevice({'filters': usbFilters});
     const port = new SerialPort(device, polyfillOptions);
     return port;
   }
@@ -565,7 +572,7 @@ export class Serial {
       Promise<SerialPort[]> {
     polyfillOptions = {...kDefaultPolyfillOptions, ...polyfillOptions};
 
-    const devices = await navigator.usb.getDevices();
+    const devices = await this.usb.getDevices();
     const ports: SerialPort[] = [];
     devices.forEach((device) => {
       try {
