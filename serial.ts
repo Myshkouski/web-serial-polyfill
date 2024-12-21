@@ -513,7 +513,7 @@ export class SerialPort {
 }
 
 /** implementation of the global navigator.serial object */
-class Serial {
+export class Serial {
   /**
    * Requests permission to access a new port.
    *
