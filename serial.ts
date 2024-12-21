@@ -515,7 +515,7 @@ export class SerialPort {
 /** implementation of the global navigator.serial object */
 export class Serial {
   /**
-   * @param {USB} usb Instance of navigator.serial object
+   * @param {USB} usb Instance of navigator.usb object
    */
   constructor(
     private readonly usb: USB
