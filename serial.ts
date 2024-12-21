@@ -512,14 +512,17 @@ export class SerialPort {
   }
 }
 
-/** implementation of the global navigator.serial object */
-export class Serial {
+/** generic implementation of navigator.serial object */
+export abstract class BaseSerial<T extends SerialPort> {
   /**
    * @param {USB} usb Instance of navigator.usb object
    */
   constructor(
-    private readonly usb: USB
+    protected readonly usb: USB,
   ) { }
+
+  protected abstract createPort(device: USBDevice,
+    options?: SerialPolyfillOptions): T
 
   /**
    * Requests permission to access a new port.
@@ -530,7 +533,7 @@ export class Serial {
    */
   async requestPort(
       options?: SerialPortRequestOptions,
-      polyfillOptions?: SerialPolyfillOptions): Promise<SerialPort> {
+      polyfillOptions?: SerialPolyfillOptions): Promise<T> {
     polyfillOptions = {...kDefaultPolyfillOptions, ...polyfillOptions};
 
     const usbFilters: USBDeviceFilter[] = [];
@@ -556,7 +559,7 @@ export class Serial {
     }
 
     const device = await this.usb.requestDevice({'filters': usbFilters});
-    const port = new SerialPort(device, polyfillOptions);
+    const port = this.createPort(device, polyfillOptions);
     return port;
   }
 
@@ -568,20 +571,32 @@ export class Serial {
    * @return {Promise<SerialPort[]>} a promise that is resolved with a list of
    * ports.
    */
-  async getPorts(polyfillOptions?: SerialPolyfillOptions):
-      Promise<SerialPort[]> {
+  async getPorts(polyfillOptions?: SerialPolyfillOptions): Promise<T[]> {
     polyfillOptions = {...kDefaultPolyfillOptions, ...polyfillOptions};
 
     const devices = await this.usb.getDevices();
-    const ports: SerialPort[] = [];
+    const ports: T[] = [];
     devices.forEach((device) => {
       try {
-        const port = new SerialPort(device, polyfillOptions);
+        const port = this.createPort(device, polyfillOptions);
         ports.push(port);
       } catch (e) {
         // Skip unrecognized port.
       }
     });
     return ports;
+  }
+}
+
+/** default implementation of the global navigator.serial object */
+export class Serial extends BaseSerial<SerialPort> {
+  /**
+   * @param {USBDevice} device
+   * @param {SerialPolyfillOptions} options
+   * @return {SerialPort} Default serial port implementation
+   */
+  protected createPort(device: USBDevice,
+      options?: SerialPolyfillOptions): SerialPort {
+    return new SerialPort(device, options);
   }
 }
