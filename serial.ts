@@ -282,15 +282,12 @@ export class SerialPort {
    * Used before closing device.
    */
   private async releaseInterfaces_(): Promise<void> {
-    if (this.transferInterface_.claimed) {
-      await this.device_.releaseInterface(
-          this.transferInterface_.interfaceNumber
-      );
-    }
-    if (this.controlInterface_.claimed) {
-      await this.device_.releaseInterface(
-          this.controlInterface_.interfaceNumber);
-    }
+    await this.device_.releaseInterface(
+        this.transferInterface_.interfaceNumber
+    );
+    await this.device_.releaseInterface(
+        this.controlInterface_.interfaceNumber
+    );
   }
 
   /**
