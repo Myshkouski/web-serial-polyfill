@@ -278,6 +278,22 @@ export class SerialPort {
   }
 
   /**
+   * Release transfer and control interfaces.
+   * Used before closing device.
+   */
+  private async releaseInterfaces_(): Promise<void> {
+    if (this.transferInterface_.claimed) {
+      await this.device_.releaseInterface(
+          this.transferInterface_.interfaceNumber
+      );
+    }
+    if (this.controlInterface_.claimed) {
+      await this.device_.releaseInterface(
+          this.controlInterface_.interfaceNumber);
+    }
+  }
+
+  /**
    * a function that opens the device and claims all interfaces needed to
    * control and communicate to and from the serial device
    * @param {SerialOptions} options Object containing serial options
@@ -329,11 +345,7 @@ export class SerialPort {
     this.writable_ = null;
     if (this.device_.opened) {
       await this.setSignals({dataTerminalReady: false, requestToSend: false});
-      if (this.transferInterface_.claimed) {
-        await this.device_.releaseInterface(
-            this.transferInterface_.interfaceNumber
-        );
-      }
+      await this.releaseInterfaces_();
       await this.device_.close();
     }
   }
