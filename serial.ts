@@ -132,15 +132,15 @@ class UsbEndpointUnderlyingSource implements UnderlyingByteSource {
 
     try {
       const result = await this.device_.transferIn(
-        this.endpoint_.endpointNumber, chunkSize);
+          this.endpoint_.endpointNumber, chunkSize);
       if (result.status != 'ok') {
         controller.error(`USB error: ${result.status}`);
         this.onError_();
       }
       if (result.data?.buffer) {
         const chunk = new Uint8Array(
-          toArrayBuffer(result.data.buffer), result.data.byteOffset,
-          result.data.byteLength);
+            toArrayBuffer(result.data.buffer), result.data.byteOffset,
+            result.data.byteLength);
         controller.enqueue(chunk);
       }
     } catch (error) {
@@ -330,7 +330,9 @@ export class SerialPort {
     if (this.device_.opened) {
       await this.setSignals({dataTerminalReady: false, requestToSend: false});
       if (this.transferInterface_.claimed) {
-        await this.device_.releaseInterface(this.transferInterface_.interfaceNumber);
+        await this.device_.releaseInterface(
+            this.transferInterface_.interfaceNumber
+        );
       }
       await this.device_.close();
     }
@@ -602,12 +604,19 @@ export class Serial extends BaseSerial<SerialPort> {
   }
 }
 
+/**
+ * Converts ArrayBufferLike to ArrayBuffer.
+ *
+ * @param {buffer} buffer
+ * @return {ArrayBuffer}  original ArrayBuffer
+ *                        or new ArrayBuffer with contents of SharedArrayBuffer
+ */
 function toArrayBuffer(buffer: ArrayBufferLike) {
   if (buffer instanceof ArrayBuffer) {
     // Return buffer when it's already an ArrayBuffer
-    return buffer
+    return buffer;
   }
-  
+
   // Create a new ArrayBuffer with the same byte length
   const arrayBuffer = new ArrayBuffer(buffer.byteLength);
 
