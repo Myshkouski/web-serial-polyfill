@@ -320,6 +320,7 @@ export class SerialPort {
       await this.setSignals({dataTerminalReady: true});
     } catch (error) {
       if (this.device_.opened) {
+        await this.releaseInterfaces_();
         await this.device_.close();
       }
       throw new Error('Error setting up device: ' + error.toString());
