@@ -331,6 +331,7 @@ export class SerialPort {
     this.writable_ = null;
     if (this.device_.opened) {
       await this.setSignals({dataTerminalReady: false, requestToSend: false});
+      await this.device_.releaseInterface(this.transferInterface_.interfaceNumber);
       await this.device_.close();
     }
   }
