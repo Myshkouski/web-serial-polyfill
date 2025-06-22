@@ -139,7 +139,7 @@ class UsbEndpointUnderlyingSource implements UnderlyingByteSource {
       }
       if (result.data?.buffer) {
         const chunk = new Uint8Array(
-          result.data.buffer, result.data.byteOffset,
+          toArrayBuffer(result.data.buffer), result.data.byteOffset,
           result.data.byteLength);
         controller.enqueue(chunk);
       }
@@ -182,7 +182,7 @@ class UsbEndpointUnderlyingSink implements UnderlyingSink<Uint8Array> {
    * @param {WritableStreamDefaultController} controller
    */
   async write(
-      chunk: Uint8Array,
+      chunk: Uint8Array<ArrayBuffer>,
       controller: WritableStreamDefaultController): Promise<void> {
     try {
       const result =
@@ -600,4 +600,23 @@ export class Serial extends BaseSerial<SerialPort> {
       options?: SerialPolyfillOptions): SerialPort {
     return new SerialPort(device, options);
   }
+}
+
+function toArrayBuffer(buffer: ArrayBufferLike) {
+  if (buffer instanceof ArrayBuffer) {
+    // Return buffer when it's already an ArrayBuffer
+    return buffer
+  }
+  
+  // Create a new ArrayBuffer with the same byte length
+  const arrayBuffer = new ArrayBuffer(buffer.byteLength);
+
+  // Create views for both buffers
+  const sharedArrayBufferView = new Uint8Array(buffer);
+  const arrayBufferView = new Uint8Array(arrayBuffer);
+
+  // Copy the contents
+  arrayBufferView.set(sharedArrayBufferView);
+
+  return arrayBuffer;
 }
