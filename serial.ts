@@ -242,6 +242,17 @@ class SerialPortPolyfill implements BaseSerialPort {
   }
 
   /**
+   * Getter for checking whether device is connected.
+   * Since there is no equivalent getter on USBDevice instance, 
+   * this getter returns "true" when device is opened, not connected. 
+   * 
+   * @returns {boolean} "true" when the underlying USB device is opened. 
+   */
+  public get connected(): boolean {
+    return this.device_.opened
+  }
+
+  /**
    * Getter for the readable attribute. Constructs a new ReadableStream as
    * necessary.
    * @return {ReadableStream} the current readable stream
