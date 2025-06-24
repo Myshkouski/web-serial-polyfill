@@ -198,8 +198,10 @@ class UsbEndpointUnderlyingSink implements UnderlyingSink<Uint8Array> {
   }
 }
 
+export type BaseSerialPort = Omit<SerialPort, "getSignals" | "onconnect" | "ondisconnect" | keyof EventTarget>
+
 /** a class used to control serial devices over WebUSB */
-export class SerialPort {
+class SerialPortPolyfill implements BaseSerialPort {
   private polyfillOptions_: SerialPolyfillOptions;
   private device_: USBDevice;
   private controlInterface_: USBInterface;
@@ -525,8 +527,10 @@ export class SerialPort {
   }
 }
 
+export { SerialPortPolyfill as SerialPort }
+
 /** generic implementation of navigator.serial object */
-export abstract class BaseSerial<T extends SerialPort> {
+export abstract class BaseSerial<T extends BaseSerialPort> {
   /**
    * @param {USB} usb Instance of navigator.usb object
    */
@@ -542,7 +546,7 @@ export abstract class BaseSerial<T extends SerialPort> {
    *
    * @param {SerialPortRequestOptions} options
    * @param {SerialPolyfillOptions} polyfillOptions
-   * @return {Promise<SerialPort>}
+   * @return {Promise<T>}
    */
   async requestPort(
       options?: SerialPortRequestOptions,
@@ -581,7 +585,7 @@ export abstract class BaseSerial<T extends SerialPort> {
    *
    * @param {SerialPolyfillOptions} polyfillOptions Polyfill configuration that
    * should be applied to these ports.
-   * @return {Promise<SerialPort[]>} a promise that is resolved with a list of
+   * @return {Promise<T[]>} a promise that is resolved with a list of
    * ports.
    */
   async getPorts(polyfillOptions?: SerialPolyfillOptions): Promise<T[]> {
@@ -602,15 +606,15 @@ export abstract class BaseSerial<T extends SerialPort> {
 }
 
 /** default implementation of the global navigator.serial object */
-export class Serial extends BaseSerial<SerialPort> {
+export class Serial extends BaseSerial<SerialPortPolyfill> {
   /**
    * @param {USBDevice} device
    * @param {SerialPolyfillOptions} options
-   * @return {SerialPort} Default serial port implementation
+   * @return {SerialPortPolyfill} Default serial port implementation
    */
   protected createPort(device: USBDevice,
-      options?: SerialPolyfillOptions): SerialPort {
-    return new SerialPort(device, options);
+      options?: SerialPolyfillOptions): SerialPortPolyfill {
+    return new SerialPortPolyfill(device, options);
   }
 }
 
